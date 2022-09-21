@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"kk-core/core/connector"
+	"kk-core/core/module"
+	"kk-core/core/pipeline"
 )
 
 var helloCmd = &cobra.Command{
@@ -13,6 +15,23 @@ var helloCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("hello")
+		m := []module.Module{
+			&module.BaseTaskModule{},
+		}
+
+		runtime := NewRuntime()
+
+		p := pipeline.Pipeline{
+			Name:    "我的测试流水线",
+			Modules: m,
+			Runtime: runtime,
+		}
+
+		p.Start()
 	},
+}
+
+func NewRuntime() connector.Runtime {
+	base := connector.NewBaseRuntime("test", connector.NewDialer(), false, false)
+	return &base
 }
