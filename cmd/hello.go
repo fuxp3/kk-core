@@ -5,6 +5,7 @@ import (
 	"kk-core/core/connector"
 	"kk-core/core/module"
 	"kk-core/core/pipeline"
+	"kk-core/prehello"
 )
 
 var helloCmd = &cobra.Command{
@@ -16,7 +17,7 @@ var helloCmd = &cobra.Command{
 	// Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
 		m := []module.Module{
-			&module.BaseTaskModule{},
+			&prehello.HelloModule{},
 		}
 
 		runtime := NewRuntime()
