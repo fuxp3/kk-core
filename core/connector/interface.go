@@ -49,6 +49,7 @@ type ModuleRuntime interface {
 	GetAllHosts() []Host
 	SetAllHosts([]Host)
 	GetHostsByRole(role string) []Host
+	GetHostsByName(name string) []Host
 	DeleteHost(host Host)
 	HostIsDeprecated(host Host) bool
 	InitLogger() error

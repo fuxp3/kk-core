@@ -145,6 +145,16 @@ func (b *BaseRuntime) GetHostsByRole(role string) []Host {
 	}
 }
 
+func (b *BaseRuntime) GetHostsByName(name string) []Host {
+	host := make([]Host, 0, 0)
+	for _, h := range b.allHosts {
+		if h.GetName() == name {
+			host = append(host, h)
+		}
+	}
+	return host
+}
+
 func (b *BaseRuntime) RemoteHost() Host {
 	return b.GetRunner().Host
 }
