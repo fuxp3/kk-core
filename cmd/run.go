@@ -11,10 +11,12 @@ import (
 )
 
 var (
-	name    string
-	command string
-	hosts   []connector.BaseHost
-	runCmd  = &cobra.Command{
+	name     string
+	command  string
+	parallel bool
+	retry    int
+	hosts    []connector.BaseHost
+	runCmd   = &cobra.Command{
 		Use:   "run",
 		Short: "kk-core",
 		Long:  "测试kk-core任务调度框架",
@@ -23,11 +25,13 @@ var (
 		// Run: func(cmd *cobra.Command, args []string) { },
 		Run: func(cmd *cobra.Command, args []string) {
 			p := pipeline.Pipeline{
-				Name: "测试流水线",
+				Name: "执行命令流水线",
 				Modules: []module.Module{
-					&common.Module{
+					&common.RunModule{
 						Hostname: name,
 						Command:  command,
+						Parallel: parallel,
+						Retry:    retry,
 					},
 				},
 				Runtime: NewRuntime(),
@@ -45,8 +49,10 @@ func init() {
 	}
 	yaml.Unmarshal(file, &hosts)
 
-	runCmd.Flags().StringVarP(&name, "name", "n", "", "主机名")
+	runCmd.Flags().StringVarP(&name, "name", "n", "", "主机名,多个用,分隔")
 	runCmd.Flags().StringVarP(&command, "command", "c", "", "命令")
+	runCmd.Flags().BoolVarP(&parallel, "parallel", "p", true, "是否并行")
+	runCmd.Flags().IntVarP(&retry, "retry", "r", 0, "测试次数")
 	runCmd.MarkFlagsRequiredTogether("name", "command")
 }
 

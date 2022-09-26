@@ -23,6 +23,7 @@ import (
 	"kk-core/core/util"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -147,9 +148,12 @@ func (b *BaseRuntime) GetHostsByRole(role string) []Host {
 
 func (b *BaseRuntime) GetHostsByName(name string) []Host {
 	host := make([]Host, 0, 0)
-	for _, h := range b.allHosts {
-		if h.GetName() == name {
-			host = append(host, h)
+	names := strings.Split(name, ",")
+	for _, n := range names {
+		for _, h := range b.allHosts {
+			if h.GetName() == n {
+				host = append(host, h)
+			}
 		}
 	}
 	return host

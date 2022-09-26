@@ -6,31 +6,34 @@ import (
 	"time"
 )
 
-type Module struct {
+type RunModule struct {
 	module.BaseTaskModule
+	Parallel bool
+	Retry    int
 	Hostname string
 	Command  string
 }
 
-func (h *Module) Init() {
-	h.Name = "TestModule"
-	h.Desc = "Test"
+func (r *RunModule) Init() {
+	r.Name = "执行命令Module"
+	r.Desc = "在目标主机上执行命令"
 
 	var timeout int64
-	for _, v := range h.Runtime.GetAllHosts() {
+	for _, v := range r.Runtime.GetAllHosts() {
 		timeout += v.GetTimeout()
 	}
 
 	test := &task.RemoteTask{
-		Name:     "run",
-		Desc:     "run",
-		Hosts:    h.Runtime.GetHostsByName(h.Hostname),
-		Action:   &Task{Command: h.Command},
-		Parallel: true,
+		Name:     "执行命令Task",
+		Desc:     "在目标主机上执行命令",
+		Hosts:    r.Runtime.GetHostsByName(r.Hostname),
+		Action:   &RunTask{Command: r.Command},
+		Parallel: r.Parallel,
 		Timeout:  time.Duration(timeout) * time.Second,
+		Retry:    r.Retry,
 	}
 
-	h.Tasks = []task.Interface{
+	r.Tasks = []task.Interface{
 		test,
 	}
 
