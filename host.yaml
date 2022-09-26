@@ -1,0 +1,15 @@
+- name: master2
+  user: root
+  port: 22
+  password: 123
+  address: 192.168.108.132
+- name: control
+  user: root
+  port: 22
+  password: 123
+  address: 192.168.108.143
+- name: 45
+  user: root
+  port: 22022
+  password: xdjr0lxGu
+  address: 10.19.85.45

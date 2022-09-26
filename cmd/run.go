@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"kk-core/core/connector"
 	"kk-core/core/module"
 	"kk-core/core/pipeline"
@@ -11,6 +13,7 @@ import (
 var (
 	name    string
 	command string
+	hosts   []connector.BaseHost
 	runCmd  = &cobra.Command{
 		Use:   "run",
 		Short: "kk-core",
@@ -36,31 +39,22 @@ var (
 )
 
 func init() {
+	file, err := ioutil.ReadFile("./host.yaml")
+	if err != nil {
+		panic(any("未加载到主机配置文件"))
+	}
+	yaml.Unmarshal(file, &hosts)
+
 	runCmd.Flags().StringVarP(&name, "name", "n", "", "主机名")
 	runCmd.Flags().StringVarP(&command, "command", "c", "", "命令")
 	runCmd.MarkFlagsRequiredTogether("name", "command")
 }
 
 func NewRuntime() connector.Runtime {
-	base := connector.NewBaseRuntime("test", connector.NewDialer(), false, false)
-	hosts := []connector.Host{
-		&connector.BaseHost{
-			Name:            "master2",
-			User:            "root",
-			Port:            22,
-			Password:        "123",
-			InternalAddress: "192.168.108.132",
-			Address:         "192.168.108.132",
-		},
-		&connector.BaseHost{
-			Name:            "control",
-			User:            "root",
-			Port:            22,
-			Password:        "123",
-			InternalAddress: "192.168.108.143",
-			Address:         "192.168.108.143",
-		},
+	base := connector.NewBaseRuntime("run", connector.NewDialer(), false, false)
+	for _, h := range hosts {
+		h := h
+		base.AppendHost(&h)
 	}
-	base.SetAllHosts(hosts)
 	return &base
 }
