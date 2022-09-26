@@ -4,10 +4,10 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"kk-core/common"
 	"kk-core/core/connector"
 	"kk-core/core/module"
 	"kk-core/core/pipeline"
-	"kk-core/test"
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 			p := pipeline.Pipeline{
 				Name: "测试流水线",
 				Modules: []module.Module{
-					&test.Module{
+					&common.Module{
 						Hostname: name,
 						Command:  command,
 					},

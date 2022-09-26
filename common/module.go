@@ -1,4 +1,4 @@
-package test
+package common
 
 import (
 	"kk-core/core/module"
