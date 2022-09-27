@@ -11,9 +11,9 @@ type RunTask struct {
 	Command string
 }
 
-func (t *RunTask) Execute(runtime connector.Runtime) error {
+func (r *RunTask) Execute(runtime connector.Runtime) error {
 	//hello, err := runtime.GetRunner().SudoCmd("echo 'Greetings, KubeKey!'", true)
-	hello, err := runtime.GetRunner().SudoCmd(t.Command, false)
+	hello, err := runtime.GetRunner().SudoCmd(r.Command, false)
 	if err != nil {
 		return err
 	}
