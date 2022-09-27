@@ -44,7 +44,7 @@ func (b *BaseTaskModule) Run(result *ending.ModuleResult) {
 		t := b.Tasks[i]
 		t.Init(b.Runtime.(connector.Runtime), b.ModuleCache, b.PipelineCache)
 
-		logger.Log.Infof("[%s] %s", b.Name, t.GetDesc())
+		//logger.Log.Infof("[%s] %s", b.Name, t.GetDesc())
 		res := t.Execute()
 		for j := range res.ActionResults {
 			ac := res.ActionResults[j]

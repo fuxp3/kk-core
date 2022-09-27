@@ -12,6 +12,7 @@ import (
 	"kk-core/core/module"
 	"kk-core/core/pipeline"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -19,7 +20,6 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var (
 	name     string
-	command  string
 	parallel bool
 	retry    int
 	hosts    []connector.BaseHost
@@ -36,7 +36,7 @@ var (
 				Modules: []module.Module{
 					&common.RunModule{
 						Hostname: name,
-						Command:  command,
+						Command:  strings.Join(args, " "),
 						Parallel: parallel,
 						Retry:    retry,
 					},
@@ -73,11 +73,10 @@ func init() {
 	}
 	yaml.Unmarshal(file, &hosts)
 
-	rootCmd.Flags().StringVarP(&name, "name", "n", "", "主机名,多个用,分隔")
-	rootCmd.Flags().StringVarP(&command, "command", "c", "", "命令")
+	rootCmd.Flags().StringVarP(&name, "name", "n", "", "主机,多个主机用\",\"分隔")
 	rootCmd.Flags().BoolVarP(&parallel, "parallel", "p", true, "是否并行")
-	rootCmd.Flags().IntVarP(&retry, "retry", "r", 0, "测试次数")
-	rootCmd.MarkFlagsRequiredTogether("name", "command")
+	rootCmd.Flags().IntVarP(&retry, "retry", "r", 1, "重试次数")
+	rootCmd.MarkFlagsRequiredTogether("name")
 }
 
 func NewRuntime() connector.Runtime {

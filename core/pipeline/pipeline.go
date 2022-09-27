@@ -17,11 +17,9 @@
 package pipeline
 
 import (
-	"fmt"
 	"kk-core/core/cache"
 	"kk-core/core/connector"
 	"kk-core/core/ending"
-	"kk-core/core/logger"
 	"kk-core/core/module"
 	"os"
 	"sync"
@@ -51,7 +49,7 @@ type Pipeline struct {
 }
 
 func (p *Pipeline) Init() error {
-	fmt.Print(logo)
+	//fmt.Print(logo)
 	p.PipelineCache = cache.NewCache()
 	p.SpecHosts = len(p.Runtime.GetAllHosts())
 	//if err := p.Runtime.GenerateWorkDir(); err != nil {
@@ -101,7 +99,7 @@ func (p *Pipeline) Start() error {
 	if p.SpecHosts != len(p.Runtime.GetAllHosts()) {
 		return errors.Errorf("Pipeline[%s] execute failed: there are some error in your spec hosts", p.Name)
 	}
-	logger.Log.Infof("Pipeline[%s] execute successfully", p.Name)
+	//logger.Log.Infof("Pipeline[%s] execute successfully", p.Name)
 	return nil
 }
 
