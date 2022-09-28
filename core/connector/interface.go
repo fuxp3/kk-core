@@ -17,6 +17,7 @@
 package connector
 
 import (
+	"golang.org/x/crypto/ssh"
 	"io"
 	"kk-core/core/cache"
 	"os"
@@ -32,6 +33,7 @@ type Connection interface {
 	MkDirAll(path string, mode string, host Host) error
 	Chmod(path string, mode os.FileMode) error
 	Close()
+	Session() (*ssh.Session, error)
 }
 
 type Connector interface {

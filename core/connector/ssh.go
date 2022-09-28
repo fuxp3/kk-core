@@ -259,6 +259,33 @@ func (c *connection) session() (*ssh.Session, error) {
 	return sess, nil
 }
 
+func (c *connection) Session() (*ssh.Session, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.sshclient == nil {
+		return nil, errors.New("connection closed")
+	}
+
+	sess, err := c.sshclient.NewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          0,     // disable echoing
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+	}
+
+	err = sess.RequestPty("xterm", 100, 50, modes)
+	if err != nil {
+		return nil, err
+	}
+
+	return sess, nil
+}
+
 func (c *connection) PExec(cmd string, stdin io.Reader, stdout io.Writer, stderr io.Writer, host Host) (int, error) {
 	sess, err := c.session()
 	if err != nil {
