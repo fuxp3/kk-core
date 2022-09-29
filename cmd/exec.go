@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh"
 	"kk-core/core/connector"
 	"kk-core/core/logger"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -22,41 +20,17 @@ var (
 		// has an action associated with it:
 		// Run: func(cmd *cobra.Command, args []string) { },
 		Run: func(cmd *cobra.Command, args []string) {
-			runtime := NewRuntime()
-
 			host := GetHostsByName(name)
 			if host == nil {
 				logger.Log.Warnf("未找到主机：%s", name)
 				return
 			}
 
-			conn, err := runtime.GetConnector().Connect(host)
-			defer runtime.GetConnector().Close(host)
+			/*err := executeCmd("echo hello", host)
 			if err != nil {
-				logger.Log.Errorln(errors.Wrapf(err, "failed to connect to %s", name))
-				return
-			}
-			sess, err := conn.Session()
-			if err != nil {
-				logger.Log.Errorln(errors.Wrap(err, "failed to get SSH session"))
-				return
-			}
-			defer sess.Close()
-
-			exitCode := 0
-
-			in, _ := sess.StdinPipe()
-			out, _ := sess.StdoutPipe()
-
-			err = sess.Shell()
-			if err != nil {
-				exitCode = -1
-				if exitErr, ok := err.(*ssh.ExitError); ok {
-					exitCode = exitErr.ExitStatus()
-				}
-				logger.Log.Errorln(err, exitCode)
-				return
-			}
+				logger.Log.Errorln(err)
+			}*/
+			var command string
 
 			fmt.Println("连接主机...")
 			fmt.Println("连接主机成功")
@@ -64,72 +38,36 @@ var (
 			fmt.Printf("[root@%s ~]# ", host.GetName())
 
 			reader := bufio.NewReader(os.Stdin) //终端输入
-			var command string
 			for {
-				for {
+				line, _, _ := reader.ReadLine()
+				command = string(line)
+				/*for {
 					b, err := reader.ReadByte()
 					if err != nil {
+						break
+					}
+					if b == byte('\r') {
 						break
 					}
 					if b == byte('\n') {
 						break
 					}
 					command += string(b)
-				}
+				}*/
 
 				if command != "" {
-					_, err = in.Write([]byte(command + "\n")) //主机输入
+					respMsg, err := executeCmd(command, host)
 					if err != nil {
 						logger.Log.Errorln(err)
-						return
+						//return
 					}
-
-					var (
-						output []byte //存储主机输出
-						line   = ""
-						r      = bufio.NewReader(out) //主机输出
-					)
-
-					for {
-						b, err := r.ReadByte() //主机输出
-						if err != nil {
-							break
-						}
-
-						output = append(output, b) //读取到的每个byte放到output中
-
-						if b == byte('\n') {
-							line = ""
-							continue
-						}
-
-						line += string(b)
-
-						if (strings.HasPrefix(line, "[sudo] password for ") || strings.HasPrefix(line, "Password")) && strings.HasSuffix(line, ": ") {
-							_, err = in.Write([]byte(host.GetPassword() + "\n")) //主机输入
-							if err != nil {
-								break
-							}
-						}
-					}
-
-					err = sess.Wait()
-					if err != nil {
-						exitCode = -1
-						if exitErr, ok := err.(*ssh.ExitError); ok {
-							exitCode = exitErr.ExitStatus()
-						}
-					}
-					outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", host.GetUser()))
-
-					logger.Log.Messagef(host.GetName(), outStr)
-					//fmt.Println(command)
+					fmt.Println(respMsg)
+					fmt.Printf("[%s@%s ~]# ", host.GetUser(), host.GetName())
+				} else {
+					fmt.Printf("[%s@%s ~]# ", host.GetUser(), host.GetName())
 				}
-
-				fmt.Printf("[%s@%s ~]# ", host.GetUser(), host.GetName())
 				command = ""
 			}
-
 		},
 	}
 )
@@ -145,4 +83,25 @@ func GetHostsByName(name string) connector.Host {
 		}
 	}
 	return nil
+}
+
+func executeCmd(cmd string, host connector.Host) (string, error) {
+	runtime := NewRuntime()
+	conn, err := runtime.GetConnector().Connect(host)
+	defer runtime.GetConnector().Close(host)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to connect to %s", host.GetAddress())
+	}
+
+	r := &connector.Runner{
+		Conn: conn,
+		//Debug: runtime.Arg.Debug,
+		Host: host,
+	}
+
+	respMsg, err := r.SudoCmd(cmd, false)
+	if err != nil {
+		return "", err
+	}
+	return respMsg, nil
 }
