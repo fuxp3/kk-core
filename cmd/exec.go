@@ -39,6 +39,11 @@ var (
 			}*/
 			var command string
 
+			_, err := executeCmd(runtime, "echo hello", host)
+			if err != nil {
+				fmt.Println(err)
+			}
+
 			fmt.Println("连接主机...")
 			fmt.Println("连接主机成功")
 			fmt.Println("Last login:", time.Now())
