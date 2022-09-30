@@ -8,6 +8,7 @@ import (
 	"kk-core/core/connector"
 	"kk-core/core/logger"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -20,6 +21,12 @@ var (
 		// has an action associated with it:
 		// Run: func(cmd *cobra.Command, args []string) { },
 		Run: func(cmd *cobra.Command, args []string) {
+			runtime := NewRuntime()
+
+			if name == "" {
+				name = strings.Join(args, ",")
+			}
+
 			host := GetHostsByName(name)
 			if host == nil {
 				logger.Log.Warnf("未找到主机：%s", name)
@@ -56,7 +63,7 @@ var (
 				}*/
 
 				if command != "" {
-					respMsg, err := executeCmd(command, host)
+					respMsg, err := executeCmd(runtime, command, host)
 					if err != nil {
 						logger.Log.Errorln(err)
 						//return
@@ -85,8 +92,7 @@ func GetHostsByName(name string) connector.Host {
 	return nil
 }
 
-func executeCmd(cmd string, host connector.Host) (string, error) {
-	runtime := NewRuntime()
+func executeCmd(runtime connector.Runtime, cmd string, host connector.Host) (string, error) {
 	conn, err := runtime.GetConnector().Connect(host)
 	defer runtime.GetConnector().Close(host)
 	if err != nil {
